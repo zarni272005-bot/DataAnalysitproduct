@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 import sqlite3
 from pathlib import Path
 
@@ -13,11 +14,15 @@ DATA_DIR.mkdir(exist_ok=True)
 st.set_page_config(page_title="Retail Pulse Dashboard", page_icon="📈", layout="wide")
 
 
-@st.cache_resource
+@contextmanager
 def get_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-    return conn
+    try:
+        with conn:
+            yield conn
+    finally:
+        conn.close()
 
 
 def initialize_database():
